@@ -25,20 +25,9 @@
 * a datetime object can be created FROM an ISO formatted string with: datetime.fromisoformat(...)
 
 # Cache_Item class
-* situations of how the class may be created:
-	* cached item created for the first time
-		* ATTRIBUTES:
-			* generate file name (optional)
-			* generate current time (datetime object) (optional)
-			* generate expiration time (datetime object) (optional)
-		* METHODS:
-			* automatically create file
-		* OTHER:
-			* >>> the HTML content of the cached object & file will be EMPTY and INACCESSIBLE until written to
-	* cached item read from an existing file
-		* ATTRIBUTES:
-			* be given file name
-			* be given current time (datetime object)
-			* be given expiration time (datetime object)
-		* OTHER:
-			* >>> the HTML content already exists (can immediately be read from)
+* `__INIT__` PARAMETERS FOR ATTRIBUTES:
+	* file name
+	* url
+	* current/creation time (datetime object)
+	* expiration time (datetime object)
+	* time interval between creation & expiration time (NOT timedelta, it is integer)

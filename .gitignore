@@ -1,0 +1,4 @@
+fetcher_cache/
+*.html
+*.bak
+fetcher_db.txt

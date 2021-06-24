@@ -2,71 +2,99 @@
 ebay scraper 2021 - webpage retrieval and caching system
 """
 
+# >>> STANDARD LIBRARY IMPORTS:
+# Datetime
 import datetime
+from datetime import datetime as datetime_object
+from datetime import timedelta as timedelta_object
+
+# Other
 import requests
 import os
 import random
 import string
+import time
+
+# >>> THIRD-PARTY IMPORTS:
+# Termcolor
+from termcolor import colored
+
+# Fake Useragent
+from fake_useragent import UserAgent
 
 
-# file and folder names for the cache-related data
+# File and folder names for the cache-related data:
 cacheDatabaseFileName = 'fetcher_db.txt'
 cacheFolderName = 'fetcher_cache'
 
-# data read from the cache database file (string and list form)
+# Data read from the cache database file (string and list form):
 cacheDatabaseRead = None
 cacheDatabaseReadLines = None
+cacheDatabaseReadLinesUrl = None
 
-# list of file and folder names to be created and checked for immediately
+# This is the version of "cacheDatabaseReadLines" that will actually be written to the database file:
+cacheDatabaseModifiedLines = None
+
+# List of file and folder names to be created and checked for immediately:
 fileNameList = [
-	'fetcher_db.txt'
+	cacheDatabaseFileName
 ]
 
 folderNameList = [
-	'fetcher_cache'
+	cacheFolderName
 ]
 
-# default file and folder permissions when creating things
+# Default file and folder permissions when creating things:
 folderMode = 0o755
 fileMode = 0o644
 
-# the length and list of characters to use (by default) when generating file names
+# The length and list of characters to use (by default) when generating file names:
 fileNameGenerateChars = string.ascii_letters + string.digits
 fileNameGenerateLength = 32
 
-# other important cache-related variables
+# Other important cache-related variables:
 cacheReferenceDict = {}
-cacheExpirationIntervalMinDefault = 10
+cacheExpirationIntervalMinDefault = 0.2
+
+# Randomize the user agent when requesting pages, to avoid 403 Forbidden errors (among other things):
+requestUserAgentRandomized = UserAgent().random
+
+# Boolean variable that either enables or disables ALL "DebugPrint..." functions.
+verboseOutput = True
 
 
-# COMPLETE
-def GenerateFileName():
-	return ''.join(random.SystemRandom().choice(fileNameGenerateChars) for loop in range(fileNameGenerateLength))
-
-
-# INCOMPLETE
+# COMPLETE "ENOUGH" FOR NOW
 class Cache_Item_Object:
 
-	# INCOMPLETE
+	# COMPLETE "ENOUGH" FOR NOW
 	def DatabasePrepare(self):
-		global cacheDatabaseRead
-		global cacheDatabaseReadLines
+		global cacheDatabaseModifiedLines
 		
+		# If the URL is in the content of the database file.
 		if self.url in cacheDatabaseRead:
-			pass
-			
+			# Find the line number with the URL.
+			self.databaseLineNumber = cacheDatabaseReadLinesUrl.index(self.url)
+		
 		else:
-			cacheDatabaseReadLines.append('')
+			# If there is no URL, simply append a new line and use that.
+			cacheDatabaseModifiedLines.append('')
 			self.databaseLineNumber = len(cacheDatabaseReadLines)
 
 
-	# INCOMPLETE
+	# COMPLETE "ENOUGH" FOR NOW
 	def DatabaseUpdate(self):
-		global cacheDatabaseRead
-		global cacheDatabaseReadLines
-
-		# there is no existing line in the database text file for the object (brand new object)
-		pass
+		global cacheDatabaseModifiedLines
+		
+		DebugPrintFuncCall('DatabaseUpdate', 'Cache_Item_Object')
+		
+		# For readability, assign string ISO-formatted timestamps to variables.
+		creationDatetimeIso = datetime_object.isoformat(self.creationDatetimeObject)
+		expirationDatetimeIso = datetime_object.isoformat(self.expirationDatetimeObject)
+		
+		# Update the line that this cache object exists on.
+		cacheDatabaseModifiedLines[self.databaseLineNumber] = '%s\t%s\t%s\t%s' % (self.url, self.fileName, creationDatetimeIso, expirationDatetimeIso)
+		
+		DatabaseFileWriteReadCycle()
 
 
 	# COMPLETE "ENOUGH" FOR NOW
@@ -93,27 +121,36 @@ class Cache_Item_Object:
 
 	# COMPLETE "ENOUGH" FOR NOW
 	def CacheContentUpdate(self):
-		# actually make the request for the website and update the object's html
-		pageRequest = requests.get(self.url)
+		DebugPrintFuncCall('CacheContentUpdate', 'Cache_Item_Object')
+		
+		# Actually make the request for the website and update the object's html.
+		pageRequest = requests.get(self.url, headers={'User-Agent':requestUserAgentRandomized})
 		self.html = pageRequest.text
 		
-		# update the creation datetime: take the datetime at this moment
-		self.creationDatetimeObject = datetime.datetime.now()
+		# Update the creation datetime: take the current date and time (datetime) at this moment.
+		self.creationDatetimeObject = datetime_object.now()
 		
-		# update the expiration datetime: take the creation datetime and add it with the expiration interval timedelta (i.e. expiration = creation + interval)
+		# Update the expiration datetime: take the creation datetime and add it with the expiration interval timedelta (i.e. expiration = creation + interval).
 		self.expirationDatetimeObject = self.creationDatetimeObject + self.expirationIntervalObject
 		
-		# update the file with the new cache content
+		# Update the file with the new cache content.
 		self.FileWrite()
+		
+		# Update the database with the new creation, expiration times, etc.
+		self.DatabaseUpdate()
 
 
 	# COMPLETE "ENOUGH" FOR NOW
 	def ExpirationCheck(self, autoUpdateFile=True):
-		# create a boolean whether or not the cache object has expired (passed expiration time)
-		expired = (datetime.datetime.now() > self.expirationDatetimeObject)
+		DebugPrintFuncCall('ExpirationCheck', 'Cache_Item_Object')
 		
-		# update the cache (and file)
+		# Create a boolean whether or not the cache object has expired (passed expiration time).
+		expired = (datetime_object.now() > self.expirationDatetimeObject)
+		
+		# Update the cache (and file).
 		if autoUpdateFile and expired:
+			DebugPrint('cache object expired! updating cache content...', important=True)
+			
 			self.CacheContentUpdate()
 		
 		return expired
@@ -121,7 +158,7 @@ class Cache_Item_Object:
 
 	# COMPLETE "ENOUGH" FOR NOW
 	def __init__(self, url, fileName, creationDatetimeObject, expirationDatetimeObject, expirationIntervalMin=None):
-		# update the attributes that can be directly taken from parameters
+		# Update the attributes that can be directly taken from parameters.
 		self.url = url
 		self.fileName = fileName
 		self.creationDatetimeObject = creationDatetimeObject
@@ -130,96 +167,166 @@ class Cache_Item_Object:
 		self.databaseLineNumber = None
 		self.html = None
 		
-		# >>> expiration interval attribute
+		# >>> EXPIRATION INTERVAL ATTRIBUTE
 		if expirationIntervalMin:
-			# if given the expiration interval (minute integer), then make a timedelta object out of it
-			self.expirationIntervalObject = datetime.timedelta(minutes=expirationIntervalMin)
+			# if given the expiration interval (minute integer), then make a timedelta object out of it.
+			self.expirationIntervalObject = timedelta_object(minutes=expirationIntervalMin)
 		else:
-			# if NOT given any expiration interval (None), then make a timedelta object out of the difference between the creation datetime and expiration datetime
+			# If NOT given any expiration interval (None), then make a timedelta object out of the difference between the creation datetime and expiration datetime.
 			self.expirationIntervalObject = self.expirationDatetimeObject - self.creationDatetimeObject
 		
-		# immediately create a placeholder file
+		# Immediately create a placeholder file.
 		if self.fileName:
 			self.FileCreatePlaceholder()
+		
+		# Prepare this object to modify the database file.
+		self.DatabasePrepare()
+
+
+# COMPLETE "ENOUGH" FOR NOW
+def DebugPrintFuncCall(funcName, className=None):
+	if verboseOutput:
+		if className:
+			print(colored('\n= = = = = = = = = CLASS %s, FUNCTION CALL: %s = = = = = = = = =' % (className, funcName), 'red', attrs=['bold']))
+		else:
+			print(colored('\n= = = = = = = = = FUNCTION CALL: %s = = = = = = = = =' % funcName, 'magenta', attrs=['bold']))
+
+
+# COMPLETE "ENOUGH" FOR NOW
+def DebugPrint(string, preface=None, important=False):
+	if verboseOutput:
+		if important:
+			colorString = 'yellow'
+			colorPreface = 'red'
+		else:
+			colorString = 'blue'
+			colorPreface = 'cyan'
+		
+		string = colored(string, colorString)
+		
+		if preface:
+			string = '%s%s' % (colored('%s: ' % preface, colorPreface, attrs=['bold']), string)
+		
+		print(string)
+
+
+# COMPLETE
+def GenerateFileName():
+	return ''.join(random.SystemRandom().choice(fileNameGenerateChars) for loop in range(fileNameGenerateLength))
 
 
 # COMPLETED "ENOUGH" FOR NOW
 def GenerateCacheObject(url, expirationIntervalMin=None):
-	# if the given expiration interval is None, assume the global default
+	# If the given expiration interval is None, assume the global default.
 	if not expirationIntervalMin:	
 		expirationIntervalMin = cacheExpirationIntervalMinDefault
 	
-	# get the path: the folder with the cache object files + the generated name
+	# Get the path: the folder with the cache object files + the generated name.
 	fileName = '%s/%s.html' % (cacheFolderName, GenerateFileName())
 	
-	# get the creation datetime: the datetime at this moment
-	creationDatetimeObject = datetime.datetime.now()
+	# Get the creation datetime: take the current date and time (datetime) at this moment.
+	creationDatetimeObject = datetime_object.now()
 	
-	# get the expiration datetime: take the creation datetime and add it with the expiration interval timedelta (i.e. expiration = creation + interval)
-	expirationDatetimeObject = creationDatetimeObject + datetime.timedelta(minutes=expirationIntervalMin)
+	# Get the expiration datetime: take the creation datetime and add it with the expiration interval timedelta (i.e. expiration = creation + interval).
+	expirationDatetimeObject = creationDatetimeObject + timedelta_object(minutes=expirationIntervalMin)
 	
-	# finally create the object
+	# Finally create the object.
 	cacheObject = Cache_Item_Object(url, fileName, creationDatetimeObject, expirationDatetimeObject, expirationIntervalMin)
 	
 	return cacheObject
 
 
-# INCOMPLETE
+# COMPLETED "ENOUGH" FOR NOW
 def WebpageFetch(url, forceUpdateCache=False):
 	global cacheReferenceDict
 	
+	DebugPrintFuncCall('WebpageFetch')
+	
 	# if the URL already has a corresponding cache object in the database
 	if url in cacheReferenceDict:
+		DebugPrint('url is in the cache reference', preface='LOGIC', important=True)
 		
 		# if the user wants the latest page request (forceUpdateCache)
 		if forceUpdateCache:
+			DebugPrint('force update cache requested: returning html from cache object, but with request from website just now', preface='LOGIC', important=True)
+			
 			cacheObject.CacheContentUpdate()
 			return cacheObject.html
 		
 		# if not, then use the current cache data (but update the cache if it is expired)
 		else:
+			DebugPrint('returning cached html content (returning new html if expired)', preface='LOGIC', important=True)
+			
 			cacheObject = cacheReferenceDict[url]
 			cacheObject.ExpirationCheck(autoUpdateFile=True)
 			return cacheObject.html
 	
 	# if there is no matching cache object with the URL
 	else:
+		DebugPrint('url is NOT FOUND in the cache reference: creating new cache object', preface='LOGIC', important=True)
+		
 		cacheObject = GenerateCacheObject(url)
 		cacheReferenceDict[url] = cacheObject
 		cacheObject.CacheContentUpdate()
 		return cacheObject.html
 
 
-def DatabaseFileRead():
+# COMPLETED "ENOUGH" FOR NOW
+def DatabaseFileWrite():
+	with open(cacheDatabaseFileName, 'w') as fileItself:
+		fileItself.write('\n'.join(cacheDatabaseModifiedLines))
+
+
+# COMPLETED "ENOUGH" FOR NOW
+def DatabaseFileRead(initObjectCreate=False):
 	global cacheDatabaseRead
 	global cacheDatabaseReadLines
+	global cacheDatabaseReadLinesUrl
+	global cacheDatabaseModifiedLines
+	
+	global cacheReferenceDict
+	
+	DebugPrintFuncCall('DatabaseFileRead')
 	
 	with open(cacheDatabaseFileName, 'r') as fileItself:
 		cacheDatabaseRead = fileItself.read()
-		cacheDatabaseReadLines = fileItself.readlines()
-
-
-# INCOMPLETE
-def InitCacheScan():
-	global cacheReferenceDict
-	
-	# INCOMPLETE
-	with open(cacheDatabaseFileName, 'r') as fileItself:
-		DatabaseFileRead()
 		
-		for line in cacheDatabaseReadLines:
-			lineSplit = line.split('\t')
-			
-			url = lineSplit[0]
-			fileName = lineSplit[1]
-			creationDatetimeObject = datetime.datetime.fromisoformat(lineSplit[2])
-			expirationDatetimeObject = datetime.datetime.fromisoformat(lineSplit[3])
-			
-			cacheReferenceDict[url] = Cache_Item_Object(url, fileName, creationDatetimeObject, expirationDatetimeObject)
+		if cacheDatabaseRead:
+			cacheDatabaseReadLines = cacheDatabaseRead.split('\n')
+			cacheDatabaseReadLinesUrl = [line.split('\t')[0] for line in cacheDatabaseReadLines]
+		else:
+			cacheDatabaseReadLines = []
+			cacheDatabaseReadLinesUrl = []
+		
+		cacheDatabaseModifiedLines = cacheDatabaseReadLines.copy()
+		
+		if initObjectCreate and cacheDatabaseReadLines:
+			for line in cacheDatabaseReadLines:
+				lineSplit = line.split('\t')
+				
+				url = lineSplit[0]
+				fileName = lineSplit[1]
+				creationDatetimeObject = datetime_object.fromisoformat(lineSplit[2])
+				expirationDatetimeObject = datetime_object.fromisoformat(lineSplit[3])
+				
+				DebugPrint('URL=%s\tfilename=%s' % (url, fileName), preface='found item', important=True)
+				
+				cacheReferenceDict[url] = Cache_Item_Object(url, fileName, creationDatetimeObject, expirationDatetimeObject)
+		
+		DebugPrint('\n%s' % cacheDatabaseRead, preface='cacheDatabaseRead')
+		DebugPrint(str(cacheDatabaseReadLines), preface='cacheDatabaseReadLines')
+		DebugPrint(str(cacheDatabaseReadLinesUrl), preface='cacheDatabaseReadLinesUrl')
+
+
+# COMPLETED "ENOUGH" FOR NOW
+def DatabaseFileWriteReadCycle():
+	DatabaseFileWrite()
+	DatabaseFileRead()
 
 
 # COMPLETED "ENOUGH" FOR NOW
 def InitFilesNeededCreate():
+	DebugPrintFuncCall('InitFilesNeededCreate')
 	
 	# Create the necessary folders in the folder list.
 	for folderName in folderNameList:
@@ -227,7 +334,7 @@ def InitFilesNeededCreate():
 			os.mkdir(folderName, mode=folderMode)
 		
 		except FileExistsError:
-			print('InitFilesystem: folder %s already exists!' % folderName)
+			DebugPrint('folder %s already exists!' % folderName, important=True)
 	
 	# Create the necessary files in the file list.
 	for fileName in fileNameList:
@@ -236,14 +343,30 @@ def InitFilesNeededCreate():
 			os.chmod(fileName, fileMode)
 		
 		except FileExistsError:
-			print('InitFilesystem: file %s already exists!' % fileName)
+			DebugPrint('file %s already exists!' % fileName, important=True)
+
+
+def TestProgram():
+	while True:
+		urlList = [
+			'https://en.wikipedia.org/wiki/S.M.A.R.T.',
+			'https://mydatarecoverylab.com/top-7-causes-of-hard-disk-failure/',
+			'https://computer-fixperts.com/data-recovery/common-types-hard-drive-failure-explained/'
+		]
+		
+		for url in urlList:
+			WebpageFetch(url)
+		
+		DebugPrint('\n\n(END, TIME: %s)\n\n' % datetime_object.isoformat(datetime_object.now()), important=True)
+		time.sleep(5)
+		DebugPrint('\n\nLOOPED!\n\n', important=True)
 
 
 def main():
 	InitFilesNeededCreate()
+	DatabaseFileRead(initObjectCreate=True)
 	
-	url = 'https://docs.python.org/3/library/datetime.html'
-	WebpageFetch(url)
+	TestProgram()
 
 
 main()

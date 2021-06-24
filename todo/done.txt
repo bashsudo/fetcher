@@ -1,0 +1,3 @@
+x 2021-06-24 2021-06-23 DatabasePrepare: make sure the cache object is ready to write +goal-06_22_2021-minimum_functionality +task-06_22_2021-small_work_on_fetcher
+x 2021-06-24 2021-06-23 DatabaseUpdate: actually start writing stuff to the database +goal-06_22_2021-minimum_functionality +task-06_22_2021-small_work_on_fetcher
+x 2021-06-24 2021-06-23 InitCacheScan +goal-06_22_2021-minimum_functionality +task-06_22_2021-small_work_on_fetcher
