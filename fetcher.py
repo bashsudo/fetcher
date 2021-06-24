@@ -23,6 +23,10 @@ from termcolor import colored
 from fake_useragent import UserAgent
 
 
+# ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+# ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+
+
 # File and folder names for the cache-related data:
 cacheDatabaseFileName = 'fetcher_db.txt'
 cacheFolderName = 'fetcher_cache'
@@ -63,6 +67,12 @@ requestUserAgentRandomized = UserAgent().random
 verboseOutput = True
 
 
+# ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+# ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+
+
+# === === === === === === === === === === === === === === === === === === === === === === === === === ===
+# >>> >>> >>> WARNING: THIS CLASS IS NOT DESIGNED TO BE USED TO EASILY AND SEEMLESSLY MAKE CACHE OBJECTS <<< <<< <<<
 # COMPLETE "ENOUGH" FOR NOW
 class Cache_Item_Object:
 
@@ -183,6 +193,11 @@ class Cache_Item_Object:
 		self.DatabasePrepare()
 
 
+
+# ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+# ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+
+
 # COMPLETE "ENOUGH" FOR NOW
 def DebugPrintFuncCall(funcName, className=None):
 	if verboseOutput:
@@ -237,37 +252,52 @@ def GenerateCacheObject(url, expirationIntervalMin=None):
 
 
 # COMPLETED "ENOUGH" FOR NOW
+# === === === === === === === === === === === === === === === === === === === === === === === === === ===
+# >>> >>> >>> THIS FUNCTION WILL BE HEAVILY USED BY OTHER SCRIPTS THAT IMPORT THE FETCHER SCRIPT <<< <<< <<<
+# >>> >>> >>> IN OTHER WORDS, THIS FUNCTION IS ALMOST THE WHOLE POINT/PURPOSE OF THE FETCHER SCRIPT <<< <<< <<<
 def WebpageFetch(url, forceUpdateCache=False):
 	global cacheReferenceDict
 	
 	DebugPrintFuncCall('WebpageFetch')
 	
-	# if the URL already has a corresponding cache object in the database
+	# If the URL already has a corresponding cache object in the database.
 	if url in cacheReferenceDict:
 		DebugPrint('url is in the cache reference', preface='LOGIC', important=True)
 		
-		# if the user wants the latest page request (forceUpdateCache)
+		# If the user wants the latest page request (forceUpdateCache).
 		if forceUpdateCache:
 			DebugPrint('force update cache requested: returning html from cache object, but with request from website just now', preface='LOGIC', important=True)
 			
+			# Forcefully update the cache content, regardless if it has expired or not.
 			cacheObject.CacheContentUpdate()
+			
 			return cacheObject.html
 		
-		# if not, then use the current cache data (but update the cache if it is expired)
+		# If not, then use the current cache data (but update the cache if it is expired).
 		else:
 			DebugPrint('returning cached html content (returning new html if expired)', preface='LOGIC', important=True)
 			
+			# Grab an existing cache object that corresponds with the URL.
 			cacheObject = cacheReferenceDict[url]
+			
+			# Check to see if it has expired (and tell the function to automatically update).
 			cacheObject.ExpirationCheck(autoUpdateFile=True)
+			
 			return cacheObject.html
 	
-	# if there is no matching cache object with the URL
+	# If there is no matching cache object with the URL.
 	else:
 		DebugPrint('url is NOT FOUND in the cache reference: creating new cache object', preface='LOGIC', important=True)
 		
+		# Create a brand-new cache object.
 		cacheObject = GenerateCacheObject(url)
+		
+		# Add it to the reference.
 		cacheReferenceDict[url] = cacheObject
+		
+		# Update the cache content (so that it can be used later).
 		cacheObject.CacheContentUpdate()
+		
 		return cacheObject.html
 
 
@@ -291,19 +321,25 @@ def DatabaseFileRead(initObjectCreate=False):
 	with open(cacheDatabaseFileName, 'r') as fileItself:
 		cacheDatabaseRead = fileItself.read()
 		
+		# If the data read from the database file is NOT blank.
 		if cacheDatabaseRead:
 			cacheDatabaseReadLines = cacheDatabaseRead.split('\n')
 			cacheDatabaseReadLinesUrl = [line.split('\t')[0] for line in cacheDatabaseReadLines]
+			
+		# If the data read from the database file IS ACTUALLY blank.
 		else:
+			# Keep the list variables EMPTY, and not "empty" with [''].
 			cacheDatabaseReadLines = []
 			cacheDatabaseReadLinesUrl = []
 		
 		cacheDatabaseModifiedLines = cacheDatabaseReadLines.copy()
 		
+		# If the function was told to create cache objects from every single line read from the database file (done first-time).
 		if initObjectCreate and cacheDatabaseReadLines:
 			for line in cacheDatabaseReadLines:
 				lineSplit = line.split('\t')
 				
+				# Get the data from the tab-separated fields.
 				url = lineSplit[0]
 				fileName = lineSplit[1]
 				creationDatetimeObject = datetime_object.fromisoformat(lineSplit[2])
@@ -311,6 +347,7 @@ def DatabaseFileRead(initObjectCreate=False):
 				
 				DebugPrint('URL=%s\tfilename=%s' % (url, fileName), preface='found item', important=True)
 				
+				# Update the cache reference with brand-new cache objects.
 				cacheReferenceDict[url] = Cache_Item_Object(url, fileName, creationDatetimeObject, expirationDatetimeObject)
 		
 		DebugPrint('\n%s' % cacheDatabaseRead, preface='cacheDatabaseRead')
@@ -346,6 +383,18 @@ def InitFilesNeededCreate():
 			DebugPrint('file %s already exists!' % fileName, important=True)
 
 
+# COMPLETED "ENOUGH" FOR NOW
+# === === === === === === === === === === === === === === === === === === === === === === === === === ===
+# >>> >>> >>> THIS FUNCTION SHOULD BE CALLED IMMEDIATELY WHEN THIS SCRIPT IS IMPORTED OR RAN! <<< <<< <<<
+def InitEverything():
+	InitFilesNeededCreate()
+	DatabaseFileRead(initObjectCreate=True)
+
+
+# ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+# ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+
+
 def TestProgram():
 	while True:
 		urlList = [
@@ -363,10 +412,12 @@ def TestProgram():
 
 
 def main():
-	InitFilesNeededCreate()
-	DatabaseFileRead(initObjectCreate=True)
-	
 	TestProgram()
 
 
-main()
+if __name__ == '__main__':
+	InitEverything()
+	main()
+	
+else:
+	InitEverything()
