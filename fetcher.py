@@ -340,17 +340,22 @@ def DatabaseCleanup():
 		fileName = lineSplit[1]
 		expirationDatetimeObject = datetime_object.fromisoformat(lineSplit[3])
 		
+		# Testing if the cache object expired (current date-time exceeds the expiration date-time of the object)
 		if datetime_object.now() > expirationDatetimeObject:
 			DebugPrint('removed expired cache object in database (URL="%s"\tfilename="%s")' % (url, fileName), important=True, preface='CLEANUP/DELETE')
 			
+			# Remove the corresponding HTML file with the cache object.
 			os.remove(fileName)
 			
+			# Removes the line from the modified-lines buffer list.
 			del cacheDatabaseModifiedLines[cacheDatabaseReadLines.index(line)]
-			
-			DatabaseFileWriteReadCycle()
-			
-			for cacheObject in list(cacheReferenceDict.values()):
-				cacheObject.DatabasePrepare()
+	
+	# At the very end, write the changes and read from the file.
+	DatabaseFileWriteReadCycle()
+	
+	# Tell the existing cache objects to adjust to the shifted lines in the database file (due to possibly deleted lines).
+	for cacheObject in list(cacheReferenceDict.values()):
+		cacheObject.DatabasePrepare()
 	
 	DebugPrintFuncCall('DatabaseCleanup', end=True)
 
