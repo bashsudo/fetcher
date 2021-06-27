@@ -3,3 +3,5 @@ x 2021-06-24 2021-06-23 DatabaseUpdate: actually start writing stuff to the data
 x 2021-06-24 2021-06-23 InitCacheScan +goal-06_22_2021-minimum_functionality +task-06_22_2021-small_work_on_fetcher
 x 2021-06-26 2021-06-24 <<add a garbage collection feature (automatically delete expired cache files when first ran)>>
 x 2021-06-26 2021-06-26 <<make it easy to change the cache folder & file paths -- eliminate the 'fileNameList' and 'folderNameList'>>
+x 2021-06-26 2021-06-26 <<fix strange behavior with custom 'expirationIntervalMin' parameters with 'WebpageFetch' where different expiration intervals are applied as seconds, not actually minutes!!>>
+x 2021-06-26 2021-06-24 <<add functionality to the WebpageFetch function to have an expiration time parameter that differs from the default>>
