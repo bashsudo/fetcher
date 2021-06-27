@@ -39,15 +39,6 @@ cacheDatabaseReadLinesUrl = None
 # This is the version of "cacheDatabaseReadLines" that will actually be written to the database file:
 cacheDatabaseModifiedLines = None
 
-# List of file and folder names to be created and checked for immediately:
-fileNameList = [
-	cacheDatabaseFileName
-]
-
-folderNameList = [
-	cacheFolderName
-]
-
 # Default file and folder permissions when creating things:
 folderMode = 0o755
 fileMode = 0o644
@@ -427,22 +418,20 @@ def DatabaseFileWriteReadCycle():
 def InitFilesNeededCreate():
 	DebugPrintFuncCall('InitFilesNeededCreate')
 	
-	# Create the necessary folders in the folder list.
-	for folderName in folderNameList:
-		try:
-			os.mkdir(folderName, mode=folderMode)
-		
-		except FileExistsError:
-			DebugPrint('folder %s already exists!' % folderName, important=True)
+	# Create the cache folder.
+	try:
+		os.mkdir(cacheFolderName, mode=folderMode)
 	
-	# Create the necessary files in the file list.
-	for fileName in fileNameList:
-		try:
-			open(fileName, 'x').close()
-			os.chmod(fileName, fileMode)
-		
-		except FileExistsError:
-			DebugPrint('file %s already exists!' % fileName, important=True)
+	except FileExistsError:
+		DebugPrint('folder "%s" already exists!' % cacheFolderName, important=True)
+	
+	# Create the database file.
+	try:
+		open(cacheDatabaseFileName, 'x').close()
+		os.chmod(cacheDatabaseFileName, fileMode)
+	
+	except FileExistsError:
+		DebugPrint('file "%s" already exists!' % cacheDatabaseFileName, important=True)
 
 
 # COMPLETED "ENOUGH" FOR NOW
