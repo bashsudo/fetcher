@@ -1,2 +1,4 @@
 2021-06-23 TAGS: BRANCH & TASK +goal-06_22_2021-minimum_functionality +task-06_22_2021-small_work_on_fetcher id:1
 2021-06-23 TAGS PARENT p:1
+(A) 2021-06-24 <<add functionality to the WebpageFetch function to have an expiration time parameter that differs from the default>>
+(B) 2021-06-26 <<make it easy to change the cache folder & file paths -- eliminate the 'fileNameList' and 'folderNameList'>>
