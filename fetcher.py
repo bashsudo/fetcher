@@ -1,5 +1,5 @@
 """
-ebay scraper 2021 - webpage retrieval and caching system
+ebay scraper 2021 / fetcher - webpage retrieval and caching system
 """
 
 # >>> STANDARD LIBRARY IMPORTS:
@@ -71,8 +71,6 @@ class Cache_Item_Object:
 	def DatabasePrepare(self):
 		global cacheDatabaseModifiedLines
 		
-		DebugPrintFuncCall('DatabasePrepare', 'Cache_Item_Object')
-		
 		# If the URL is in the content of the database file.
 		if self.url in cacheDatabaseRead:
 			# Find the line number with the URL.
@@ -83,16 +81,12 @@ class Cache_Item_Object:
 			cacheDatabaseModifiedLines.append('')
 			self.databaseLineNumber = len(cacheDatabaseReadLines)
 		
-		DebugPrint('line number (NOT LIST NUMBER) now "%d" for URL "%s"' % (self.databaseLineNumber + 1, self.url), preface='LINE NUMBER UPDATE', important=True)
-		
-		DebugPrintFuncCall('DatabasePrepare', 'Cache_Item_Object', end=True)
+		DebugPrint('line number (NOT LIST NUMBER) now %d' % (self.databaseLineNumber + 1), preface='(OBJECT) CACHE %s' % self.url)
 
 
 	# COMPLETE "ENOUGH" FOR NOW
 	def DatabaseUpdate(self):
 		global cacheDatabaseModifiedLines
-		
-		DebugPrintFuncCall('DatabaseUpdate', 'Cache_Item_Object')
 		
 		# For readability, assign string ISO-formatted timestamps to variables.
 		creationDatetimeIso = datetime_object.isoformat(self.creationDatetimeObject)
@@ -104,8 +98,6 @@ class Cache_Item_Object:
 		# MIGHT BE CHANGED to only write, instead of write AND read (this may be a bad idea!)
 		DatabaseFileWriteReadCycle()
 		# DatabaseFileWrite()
-		
-		DebugPrintFuncCall('DatabaseUpdate', 'Cache_Item_Object', end=True)
 
 
 	# COMPLETE "ENOUGH" FOR NOW
@@ -132,8 +124,6 @@ class Cache_Item_Object:
 
 	# COMPLETE "ENOUGH" FOR NOW
 	def CacheContentUpdate(self):
-		DebugPrintFuncCall('CacheContentUpdate', 'Cache_Item_Object')
-		
 		# Actually make the request for the website and update the object's html.
 		pageRequest = requests.get(self.url, headers={'User-Agent':requestUserAgentRandomized})
 		self.html = pageRequest.text
@@ -149,20 +139,16 @@ class Cache_Item_Object:
 		
 		# Update the database with the new creation, expiration times, etc.
 		self.DatabaseUpdate()
-		
-		DebugPrintFuncCall('CacheContentUpdate', 'Cache_Item_Object', end=True)
 
 
 	# COMPLETE "ENOUGH" FOR NOW
 	def ExpirationCheck(self, autoUpdateFile=True, autoUpdateExpirationInterval=None):
-		DebugPrintFuncCall('ExpirationCheck', 'Cache_Item_Object')
-		
 		# Create a boolean whether or not the cache object has expired (passed expiration time).
 		expired = (datetime_object.now() > self.expirationDatetimeObject)
 		
 		# Update the cache (and file).
 		if expired:
-			DebugPrint('cache object expired!', important=True, preface='EXPIRATION')
+			DebugPrint('cache object expired!', important=True, preface='(OBJECT) CACHE %s' % self.url)
 			
 			if autoUpdateExpirationInterval:
 				self.ExpirationIntervalChange(autoUpdateExpirationInterval)
@@ -171,13 +157,11 @@ class Cache_Item_Object:
 				self.CacheContentUpdate()
 		
 		return expired
-		
-		DebugPrintFuncCall('ExpirationCheck', 'Cache_Item_Object', end=True)
 
 
 	# COMPLETE "ENOUGH" FOR NOW
 	def ExpirationIntervalChange(self, expirationIntervalMin):
-		DebugPrint('CHANGED EXPIRATION INTERVAL TO %d' % expirationIntervalMin)
+		DebugPrint('changed expiration interval to %s' % str(expirationIntervalMin), preface='(OBJECT) CACHE %s' % self.url)
 		self.expirationIntervalObject = timedelta_object(minutes=expirationIntervalMin)
 
 
@@ -214,24 +198,6 @@ class Cache_Item_Object:
 
 
 # COMPLETE "ENOUGH" FOR NOW
-def DebugPrintFuncCall(funcName, className=None, end=False):
-	if end:
-		callType = 'END'
-		callDivider = '/'
-	else:
-		callType = 'START'
-		callDivider = '='
-		
-	callDividerLine = ' '.join([callDivider for repeat in range(10)])
-	
-	if verboseOutput:
-		if className:
-			print(colored('\n%s (%s) CLASS %s, FUNCTION CALL: %s %s' % (callDividerLine, callType, className, funcName, callDividerLine), 'red', attrs=['bold']))
-		else:
-			print(colored('\n%s (%s) FUNCTION CALL: %s %s' % (callDividerLine, callType, funcName, callDividerLine), 'magenta', attrs=['bold']))
-
-
-# COMPLETE "ENOUGH" FOR NOW
 def DebugPrint(string, preface=None, important=False):
 	if verboseOutput:
 		if important:
@@ -246,7 +212,7 @@ def DebugPrint(string, preface=None, important=False):
 		if preface:
 			string = '%s%s' % (colored('%s: ' % preface, colorPreface, attrs=['bold']), string)
 		
-		print(string)
+		print(string, '\n')
 
 
 # COMPLETE
@@ -285,18 +251,13 @@ def WebpageFetch(url, expirationIntervalMin=None, forceUpdateCache=False):
 	# VERY IMPORTANT NOTE:
 	# When the parameter "expirationIntervalMin" is NOT None, the expiration interval value will be changed to match it in a certain cache object ONLY when it the cahce content is updated (
 	
-	DebugPrintFuncCall('WebpageFetch')
-	
-	if expirationIntervalMin:
-		DebugPrint('"expirationIntervalMin" set to %s' % str(expirationIntervalMin))
-	
 	# If the URL already has a corresponding cache object in the database.
 	if url in cacheReferenceDict:
-		DebugPrint('url is in the cache reference', preface='FOUND', important=True)
+		DebugPrint('url is in the list of cache objects (object already exists)', preface='(WebpageFetch) CACHE %s' % url)
 		
 		# If the user wants the latest page request (forceUpdateCache).
 		if forceUpdateCache:
-			DebugPrint('force update cache requested: returning html from cache object, but with request from website just now', preface='FORCE UPDATE', important=True)
+			DebugPrint('force update cache requested: returning html from cache object, but with request from website just now', preface='(WebpageFetch) CACHE %s' % url, important=True)
 			
 			# If "expirationIntervalMin" is not None, forcefully update the expiration interval.
 			if expirationIntervalMin:
@@ -309,7 +270,7 @@ def WebpageFetch(url, expirationIntervalMin=None, forceUpdateCache=False):
 		
 		# If not, then use the current cache data (but update the cache if it is expired).
 		else:
-			DebugPrint('returning cached html content (returning new html if expired)', preface='RETURN', important=True)
+			DebugPrint('returning cached html content (returning new html if expired)', preface='(WebpageFetch) CACHE %s' % url)
 			
 			# Grab an existing cache object that corresponds with the URL.
 			cacheObject = cacheReferenceDict[url]
@@ -321,7 +282,7 @@ def WebpageFetch(url, expirationIntervalMin=None, forceUpdateCache=False):
 	
 	# If there is no matching cache object with the URL.
 	else:
-		DebugPrint('url is NOT FOUND in the cache reference: creating new cache object', preface='NOT FOUND', important=True)
+		DebugPrint('url is NOT FOUND in the list of cache objects: creating new cache object', preface='(WebpageFetch) CACHE %s' % url, important=True)
 		
 		# Create a brand-new cache object.
 		cacheObject = GenerateCacheObject(url, expirationIntervalMin=expirationIntervalMin)
@@ -333,14 +294,10 @@ def WebpageFetch(url, expirationIntervalMin=None, forceUpdateCache=False):
 		cacheObject.CacheContentUpdate()
 		
 		return cacheObject.html
-	
-	DebugPrintFuncCall('WebpageFetch', end=True)
 
 
 # THIS FUNCTION SHOULD ONLY BE USED IN THE VERY BEGINNING OF RUNNING THIS SCRIPT, SPECIFICALLY BEFORE DatabaseFileRead(init=False) DUE TO EXISTING CACHE OBJECTS IN THE REFERENCE
 def DatabaseCleanup():
-	DebugPrintFuncCall('DatabaseCleanup')
-	
 	if not cacheDatabaseReadLines:
 		DatabaseFileRead()
 	
@@ -353,7 +310,7 @@ def DatabaseCleanup():
 		
 		# Testing if the cache object expired (current date-time exceeds the expiration date-time of the object)
 		if datetime_object.now() > expirationDatetimeObject:
-			DebugPrint('removed expired cache object in database (URL="%s"\tfilename="%s")' % (url, fileName), important=True, preface='CLEANUP/DELETE')
+			DebugPrint('removed expired cache file in database (filename="%s")' % fileName, important=True, preface='(DatabaseCleanup) CACHE %s' % url)
 			
 			# Remove the corresponding HTML file with the cache object.
 			os.remove(fileName)
@@ -371,8 +328,6 @@ def DatabaseCleanup():
 	# Tell the existing cache objects to adjust to the shifted lines in the database file (due to possibly deleted lines).
 	for cacheObject in list(cacheReferenceDict.values()):
 		cacheObject.DatabasePrepare()
-	
-	DebugPrintFuncCall('DatabaseCleanup', end=True)
 
 
 # COMPLETED "ENOUGH" FOR NOW
@@ -389,8 +344,6 @@ def DatabaseFileRead(init=False):
 	global cacheDatabaseModifiedLines
 	
 	global cacheReferenceDict
-	
-	DebugPrintFuncCall('DatabaseFileRead')
 	
 	with open(cacheDatabaseFileName, 'r') as fileItself:
 		cacheDatabaseRead = fileItself.read()
@@ -420,16 +373,10 @@ def DatabaseFileRead(init=False):
 					creationDatetimeObject = datetime_object.fromisoformat(lineSplit[2])
 					expirationDatetimeObject = datetime_object.fromisoformat(lineSplit[3])
 					
-					DebugPrint('URL="%s"\tfilename="%s"' % (url, fileName), preface='FOUND ITEM', important=True)
+					DebugPrint('found cache file in database (filename="%s")' % fileName, preface='(DatabaseFileRead) CACHE %s' % url)
 					
 					# Update the cache reference with brand-new cache objects.
 					cacheReferenceDict[url] = Cache_Item_Object(url, fileName, creationDatetimeObject, expirationDatetimeObject)
-		
-		DebugPrint('\n%s' % cacheDatabaseRead, preface='cacheDatabaseRead')
-		DebugPrint(str(cacheDatabaseReadLines), preface='cacheDatabaseReadLines')
-		DebugPrint(str(cacheDatabaseReadLinesUrl), preface='cacheDatabaseReadLinesUrl')
-	
-	DebugPrintFuncCall('DatabaseFileRead', end=True)
 
 
 # COMPLETED "ENOUGH" FOR NOW
@@ -440,8 +387,6 @@ def DatabaseFileWriteReadCycle():
 
 # COMPLETED "ENOUGH" FOR NOW
 def InitFilesNeededCreate():
-	DebugPrintFuncCall('InitFilesNeededCreate')
-	
 	# Create the cache folder.
 	try:
 		os.mkdir(cacheFolderName, mode=folderMode)
@@ -472,26 +417,30 @@ def InitEverything():
 
 
 def TestProgram():
-	differentExpirationInterval = False
-	expirationInterval = 0.1
+	DebugPrint('===== ===== ===== ===== ===== ===== ===== ===== ===== =====', important=True)
+	DebugPrint('THIS TEST FUNCTION WILL DO THE FOLLOWING:', important=True)
+	DebugPrint('* USE WebpageFetch TO REQUEST 3 EXAMPLE URLS', important=True)
+	DebugPrint('* HAVE EXPIRATION INTERVALS OF 12 SECONDS', important=True)
+	DebugPrint('* LOOP EVERY 4 SECONDS TO REPEAT THE PROCESS', important=True)
+	DebugPrint('* THE EXPECTATION IS THAT EVERY 3 LOOPS (GIVE OR TAKE), THE CACHE WILL EXPIRE AND UPDATE', important=True)
+	DebugPrint('===== ===== ===== ===== ===== ===== ===== ===== ===== =====', important=True)
+	expirationInterval = 0.2
+	
+	time.sleep(6)
 	
 	while True:
 		urlList = [
-			'https://www.almanac.com/gardening/growing-guides',
-			'https://www.americanmeadows.com/planting-guides',
-			'https://earthbox.com/planting-guides'
+			'https://www.cnn.com',
+			'https://en.wikipedia.org',
+			'https://ikea.com/'
 		]
 		
 		for url in urlList:
 			WebpageFetch(url, expirationInterval)
 		
 		DebugPrint('\n\n(END, TIME: %s)\n\n' % datetime_object.isoformat(datetime_object.now()), important=True)
-		time.sleep(5)
+		time.sleep(4)
 		DebugPrint('\n\nLOOPED!\n\n', important=True)
-		
-		DebugPrint('SET NEW EXPIRATION INTERVAL')
-		differentExpirationInterval = True
-		expirationInterval = 10
 
 
 def main():
@@ -500,7 +449,6 @@ def main():
 
 if __name__ == '__main__':
 	InitEverything()
-	#time.sleep(10)
 	main()
 	
 else:
