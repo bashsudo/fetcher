@@ -9,7 +9,6 @@ from datetime import datetime as datetime_object
 from datetime import timedelta as timedelta_object
 
 # Other
-import requests
 import os
 import random
 import string
@@ -22,6 +21,8 @@ from termcolor import colored
 # Fake Useragent
 from fake_useragent import UserAgent
 
+# Requests
+import requests
 
 # ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
 # ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
