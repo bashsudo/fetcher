@@ -1,2 +1,2 @@
 # fetcher
-(GO TO THE "new_master_fecther" BRANCH TO SEE THE ACTUAL CODE FOR NOW)
+A system for creating and managing cache for website HTML files on local storage, complete with expiration times and garbage collection.
