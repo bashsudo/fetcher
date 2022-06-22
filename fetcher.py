@@ -108,7 +108,9 @@ class Cache_Item_Object:
 			os.chmod(self.fileName, fileMode)
 		
 		except FileExistsError:
-			pass
+			return False
+		
+		return True
 
 
 	# COMPLETE "ENOUGH" FOR NOW
@@ -187,7 +189,12 @@ class Cache_Item_Object:
 		
 		# Immediately create a placeholder file.
 		if self.fileName:
-			self.FileCreatePlaceholder()
+			newlyCreated = self.FileCreatePlaceholder()
+			
+			if not newlyCreated:
+				DebugPrint('HTML cache file already exists; updating object HTML content to cache file', preface='(OBJECT) CACHE %s' % self.url)
+				
+				self.FileRead()
 		
 		# Prepare this object to modify the database file.
 		self.DatabasePrepare()
@@ -256,6 +263,10 @@ def WebpageFetch(url, expirationIntervalMin=None, forceUpdateCache=False):
 	if url in cacheReferenceDict:
 		DebugPrint('url is in the list of cache objects (object already exists)', preface='(WebpageFetch) CACHE %s' % url)
 		
+		
+		# Grab an existing cache object that corresponds with the URL.
+		cacheObject = cacheReferenceDict[url]
+		
 		# If the user wants the latest page request (forceUpdateCache).
 		if forceUpdateCache:
 			DebugPrint('force update cache requested: returning html from cache object, but with request from website just now', preface='(WebpageFetch) CACHE %s' % url, important=True)
@@ -266,20 +277,15 @@ def WebpageFetch(url, expirationIntervalMin=None, forceUpdateCache=False):
 			
 			# Forcefully update the cache content, regardless if it has expired or not.
 			cacheObject.CacheContentUpdate()
-			
-			return cacheObject.html
 		
 		# If not, then use the current cache data (but update the cache if it is expired).
 		else:
-			DebugPrint('returning cached html content (returning new html if expired)', preface='(WebpageFetch) CACHE %s' % url)
-			
-			# Grab an existing cache object that corresponds with the URL.
-			cacheObject = cacheReferenceDict[url]
+			DebugPrint('returning cached html content (returning new html if expired)', preface='(WebpageFetch) CACHE %s' % url)	
 			
 			# Check to see if it has expired (and tell the function to automatically update and change the expiration interval).
 			cacheObject.ExpirationCheck(autoUpdateFile=True, autoUpdateExpirationInterval=expirationIntervalMin)
 			
-			return cacheObject.html
+		return cacheObject.html
 	
 	# If there is no matching cache object with the URL.
 	else:
