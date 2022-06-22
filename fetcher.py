@@ -56,7 +56,7 @@ cacheExpirationIntervalMinDefault = 1
 requestUserAgentRandomized = UserAgent().random
 
 # Boolean variable that either enables or disables ALL "DebugPrint..." functions.
-verboseOutput = True
+verboseOutput = False
 
 
 # ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
@@ -444,13 +444,10 @@ def TestProgram():
 		DebugPrint('\n\nLOOPED!\n\n', important=True)
 
 
-def main():
-	TestProgram()
-
-
 if __name__ == '__main__':
+	verboseOutput = True
+
 	InitEverything()
-	main()
-	
+	TestProgram()
 else:
 	InitEverything()
