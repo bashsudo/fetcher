@@ -1,7 +1,7 @@
 # fetcher
-A system for creating and managing cache for website HTML files on local storage, complete with expiration times and garbage collection.
+A system for retrieving the HTML of a website, caching the HTML, updating and expiring the cache, and performing garbage collection; all in one function call.
 
-<img src="./.github_readme/showcase.png" width="560"/>
+<img src="./.github_readme/showcase.png" width="720"/>
 
 ## Rationale and Motivation for the Project
 When it comes to developing a project that interacts with a website, problems may occur when it comes to prototyping and debugging your code. Specifically, when you run your code over and over as you write it, the code may make a request to the website for each time it is executed. This results in a needlessly massive sum of requests to the website, which may get you rate limited or flagged for suspicious activity.
@@ -66,7 +66,7 @@ Without specifying the optional parameters...
 ## Fetcher in Action
 
 ### Demo Script
-<img src="./.github_readme/demo_with_window.png" width="480"/>
+<img src="./.github_readme/demo_with_window.png" width="524"/>
 
 Want to see a step-by-step demonstration of the behavior of Fetcher and the main function **WebpageFetch**? The demo script is organized into "phases," where each phase calls **WebpageFetch** with specific parameters and after a certain artificial delay (via time.sleep) from the previous phase to demonstrate the different behaviors of **WebpageFetch**.
 
@@ -81,7 +81,7 @@ python3 demo.py
 ```
 
 ### Tester Script
-<img src="./.github_readme/tester_with_window.png" width="480"/>
+<img src="./.github_readme/tester_with_window.png" width="524"/>
 
 Want to study the behavior of Fetcher with URLs and commands YOU give in real-time instead of watching the pre-determined presentation in the demo? The tester script has a simple text-based user interface for you to call **WebpageFetch** with URLs from either a list of pre-existing examples (command **e**) or from your own input (command **m**). You may also list the URLs you have used while running the user interface (command **l**).
 
