@@ -1,9 +1,16 @@
 # fetcher
 A system for creating and managing cache for website HTML files on local storage, complete with expiration times and garbage collection.
 
-(include image here)
+<img src="./.github_readme/showcase.png" width="560"/>
 
 ## Rationale and Motivation for the Project
+When it comes to developing a project that interacts with a website, problems may occur when it comes to prototyping and debugging your code. Specifically, when you run your code over and over as you write it, the code may make a request to the website for each time it is executed. This results in a needlessly massive sum of requests to the website, which may get you rate limited or flagged for suspicious activity.
+
+You *could* download a webpage as an HTML file on your disk and work on that file, but for projects with an on-and-off schedule or deal with time-sensitive websites, this becomes a cumbersome process.
+
+But then, why not have one single function that seemlessly saves a local copy of the HTML webpage for the URLs you request and updates that copy when it is considered expired or too old to be used? This is the founding goal of Fetcher.
+
+Fetcher allows you to focus on your project and use the HTML documents you need while it performs the dirty-work of caching and updating those HTML documents as time goes on.
 
 ## Installation and Basic Use
 
@@ -59,5 +66,27 @@ Without specifying the optional parameters...
 ## Fetcher in Action
 
 ### Demo Script
+<img src="./.github_readme/demo_with_window.png" width="480"/>
+
+Want to see a step-by-step demonstration of the behavior of Fetcher and the main function **WebpageFetch**? The demo script is organized into "phases," where each phase calls **WebpageFetch** with specific parameters and after a certain artificial delay (via time.sleep) from the previous phase to demonstrate the different behaviors of **WebpageFetch**.
+
+The **summary** of each phase indicates what overall purpose the phase is serving. The **developer commentary** is also very important: it gives detailed explanatons for what is happening during the phase.
+
+To further prove that the cache is in use and the website is NOT requested for some calls to **WebpageFetch**, each phase has an **HTML difference** message that states whether or not the HTML has changed or not since the last call to **WebpageFetch** (if it has changed, then the cache was not used and was instead updated with the website). NOTE: not all websites change regularly, thus the **HTML difference** may report that the HTML has NOT changed, even when it was expected to.
+
+Run the demo with:
+
+```
+python3 demo.py
+```
 
 ### Tester Script
+<img src="./.github_readme/tester_with_window.png" width="480"/>
+
+Want to study the behavior of Fetcher with URLs and commands YOU give in real-time instead of watching the pre-determined presentation in the demo? The tester script has a simple text-based user interface for you to call **WebpageFetch** with URLs from either a list of pre-existing examples (command **e**) or from your own input (command **m**). You may also list the URLs you have used while running the user interface (command **l**).
+
+Run the tester with:
+
+```
+python3 tester.py
+```
