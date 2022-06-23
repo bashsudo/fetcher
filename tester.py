@@ -1,19 +1,25 @@
+"""
+Fetcher: Webpage Retrieval and Caching System
+2021 Eiza Stanford ("Bash Sudo" / "Charky Barky")
+
+Tester Script
+"""
+
+# >>> FETCHER IMPORTS:
 import fetcher
-#from bs4 import BeautifulSoup
+
+# >>> STANDARD LIBRARY IMPORTS:
 import pathlib
 
 fetcher.verboseOutput = True
+
+# ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+# ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
 
 class Tester:
 	
 	def tell(self, who, message, prefix=''):
 		print('>>> TESTER SYSTEM (LINK %s):%s (%s) %s' % (self.linkShort, prefix, who, message))
-	
-	
-	#def sitePiScrape(self):
-	#	soup = BeautifulSoup(self.html, 'lxml')
-	#	
-	#	blogList = soup.find_all('li', class_='c-blog-post-loop__item')
 	
 	
 	def htmlDumpWrite(self):
@@ -72,6 +78,10 @@ class Tester:
 		self.htmlDump = None
 		
 		self.fetch()
+
+
+# ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+# ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
 
 
 if __name__ == '__main__':
