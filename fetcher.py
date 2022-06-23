@@ -1,5 +1,8 @@
 """
-ebay scraper 2021 / fetcher - webpage retrieval and caching system
+Fetcher: Webpage Retrieval and Caching System
+2021 Eiza Stanford ("Bash Sudo" / "Charky Barky")
+
+Main Script
 """
 
 # >>> STANDARD LIBRARY IMPORTS:
