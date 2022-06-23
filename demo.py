@@ -63,6 +63,8 @@ def demoStep(phaseNumber, summary, message, timePassed, timeWait, cacheShouldBeS
 	
 	if phaseNumber > 1:
 		
+		print('\t* NOTE: some webpages\' HTML do NOT change with every request.')
+		
 		if cacheShouldBeSame: 
 			print('\tDEMO (DIFFERENCE EXPECTATION):\tThe HTML returned by Fetcher SHOULD be the SAME as the previously fetched HTML.')
 		

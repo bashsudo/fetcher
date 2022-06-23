@@ -152,12 +152,15 @@ class Cache_Item_Object:
 		# Create a boolean whether or not the cache object has expired (passed expiration time).
 		expired = (datetime_object.now() > self.expirationDatetimeObject)
 		
+		# NOTE: originally this if-statement was to be executed IF the object expired
+		# This was moved OUTSIDE of the expired code block
+		# Thus the expiration interval can be changed even if the cache has not expired yet
+		if autoUpdateExpirationInterval:
+			self.ExpirationIntervalChange(autoUpdateExpirationInterval)
+		
 		# Update the cache (and file).
 		if expired:
 			DebugPrint('cache object expired!', important=True, preface='(OBJECT) CACHE %s' % self.url)
-			
-			if autoUpdateExpirationInterval:
-				self.ExpirationIntervalChange(autoUpdateExpirationInterval)
 			
 			if autoUpdateFile:
 				self.CacheContentUpdate()
