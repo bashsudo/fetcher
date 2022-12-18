@@ -53,8 +53,8 @@ class Test_Container:
 	
 	
 	def fetch(self, differenceCheck=True, dumpUpdate=True):
-		#self.html = fetcher.WebpageFetch(self.link, self.expTime)
-		self.html = fetcher.WebpageFetch(self.link)
+		self.html = fetcher.WebpageFetch(self.link, expirationIntervalMin=self.expTime)
+		#self.html = fetcher.WebpageFetch(self.link)
 		self.tell('fetch', 'finished call WebpageFetch')
 		
 		if self.html:
